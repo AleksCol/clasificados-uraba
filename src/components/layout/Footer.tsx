@@ -6,7 +6,15 @@ export function Footer() {
       <Contenedor>
         <div className="flex flex-col gap-2 py-8 text-sm text-texto-suave sm:flex-row sm:items-center sm:justify-between">
           <p>Clasificados Urabá — empleos y artículos usados de la región.</p>
-          <p>{new Date().getFullYear()}</p>
+          <p className="flex items-center gap-3">
+            <span>{new Date().getFullYear()}</span>
+            <a
+              href="https://byaleks.space"
+              className="text-marca hover:text-marca-oscuro"
+            >
+              byaleks.space
+            </a>
+          </p>
         </div>
       </Contenedor>
     </footer>

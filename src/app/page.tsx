@@ -69,7 +69,9 @@ export default async function Home({
             <p className="text-sm text-texto-suave">
               {total === 1 ? "1 aviso" : `${total} avisos`}
             </p>
-            <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* items-start evita que una tarjeta con foto estire a las de al lado
+                y les deje un hueco blanco que parece una imagen rota. */}
+            <ul className="mt-4 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {avisos.map((aviso) => (
                 <TarjetaAviso key={aviso.id} aviso={aviso} />
               ))}

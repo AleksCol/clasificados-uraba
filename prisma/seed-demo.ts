@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
+import { del, list } from "@vercel/blob";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../src/generated/prisma/client";
 import type { Municipio, TipoAviso } from "../src/generated/prisma/enums";
@@ -274,6 +275,15 @@ async function main() {
     console.log(`Se limpiaron ${borrados.count} cuentas de muestra anteriores.`);
   }
 
+  // Las imágenes de muestra no caen por la cascada: viven en el store.
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const { blobs } = await list({ prefix: "avisos/demo/" });
+    if (blobs.length > 0) {
+      await del(blobs.map((b) => b.url));
+      console.log(`Se borraron ${blobs.length} imágenes de muestra del store.`);
+    }
+  }
+
   // Con --limpiar solo se borra y no se vuelve a sembrar.
   if (process.argv.includes("--limpiar")) {
     console.log("Datos de muestra eliminados.");
@@ -302,8 +312,19 @@ async function main() {
     );
   }
 
+  // Se intercalan empleos y artículos al asignar las fechas. Si no, los avisos
+  // quedan agrupados por tipo y la primera pantalla del listado sale entera de
+  // un solo tipo, que no es como se ve un tablón real.
+  const empleos = AVISOS.filter((a) => a.tipo === "empleo");
+  const articulos = AVISOS.filter((a) => a.tipo === "articulo");
+  const intercalados: SemillaAviso[] = [];
+  for (let i = 0; i < Math.max(empleos.length, articulos.length); i++) {
+    if (articulos[i]) intercalados.push(articulos[i]);
+    if (empleos[i]) intercalados.push(empleos[i]);
+  }
+
   let creados = 0;
-  for (const [indice, aviso] of AVISOS.entries()) {
+  for (const [indice, aviso] of intercalados.entries()) {
     const categoria = categorias.find(
       (c) => c.nombre === aviso.categoria && c.tipo === aviso.tipo,
     );
@@ -334,7 +355,8 @@ async function main() {
 
   console.log(`Listo: ${publicadores.length} publicadores y ${creados} avisos de muestra.`);
   console.log(`WhatsApp usado: +57 ${WHATSAPP_DEMO}`);
-  console.log("Para borrarlos: npm run db:seed-demo:limpiar");
+  console.log("Imágenes de muestra: npm run db:seed-demo:fotos");
+  console.log("Para borrar todo: npm run db:seed-demo:limpiar");
 
   await prisma.$disconnect();
 }
