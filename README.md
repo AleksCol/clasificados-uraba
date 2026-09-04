@@ -10,8 +10,7 @@ Esto lo centraliza en un listado con filtros y búsqueda, donde cada aviso tiene
 
 ## Demo
 
-<!-- Pegar la URL cuando el subdominio esté validado -->
-`[pendiente]`
+https://clasificados.byaleks.space/
 
 ## Qué hace
 
