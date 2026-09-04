@@ -11,7 +11,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "pruebas": "tsx pruebas/e2e-auth.ts && tsx pruebas/e2e-avisos.ts && tsx pruebas/e2e-listado.ts && tsx pruebas/e2e-fotos.ts && tsx pruebas/e2e-navegador.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -31,12 +32,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.25",
     "prisma": "^7.10.0",
+    "puppeteer-core": "^25.10.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
-    "typescript": "^5",
-    "dotenv": "^17.4.2"
+    "typescript": "^5"
   }
 }

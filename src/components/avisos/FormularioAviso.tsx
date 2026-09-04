@@ -115,7 +115,8 @@ export function FormularioAviso({
 
       <Select
         // Al cambiar el tipo se remonta el select con las categorías nuevas.
-        key={tipo}
+        // La key lleva prefijo porque hay otro control que también se remonta.
+        key={`categoria-${tipo}`}
         etiqueta="Categoría"
         nombre="categoriaId"
         opciones={categoriasDelTipo.map((categoria) => ({
@@ -140,7 +141,7 @@ export function FormularioAviso({
       {tipo === "articulo" && (
         <CampoFoto
           // Al cambiar de tipo se descarta lo que hubiera cargado.
-          key={tipo}
+          key={`foto-${tipo}`}
           urlInicial={valores?.fotoUrl}
           errores={estado.errores?.fotoUrl}
         />
