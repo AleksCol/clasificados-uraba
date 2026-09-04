@@ -1,7 +1,13 @@
 import Link from "next/link";
+import { salir } from "@/actions/auth";
+import { usuarioActual } from "@/lib/sesion";
 import { Contenedor } from "./Contenedor";
 
-export function Header() {
+const ENLACE = "rounded-md px-3 py-2 text-sm font-medium transition-colors";
+
+export async function Header() {
+  const usuario = await usuarioActual();
+
   return (
     <header className="border-b border-borde bg-fondo">
       <Contenedor>
@@ -11,15 +17,35 @@ export function Header() {
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-2">
-            <Link
-              href="/login"
-              className="rounded-md px-3 py-2 text-sm font-medium text-texto-suave transition-colors hover:text-texto"
-            >
-              Ingresar
-            </Link>
+            {usuario ? (
+              <>
+                <Link
+                  href="/mis-avisos"
+                  className={`${ENLACE} text-texto-suave hover:text-texto`}
+                >
+                  Mis avisos
+                </Link>
+                <form action={salir}>
+                  <button
+                    type="submit"
+                    className={`${ENLACE} text-texto-suave hover:text-texto`}
+                  >
+                    Salir
+                  </button>
+                </form>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className={`${ENLACE} text-texto-suave hover:text-texto`}
+              >
+                Ingresar
+              </Link>
+            )}
+
             <Link
               href="/mis-avisos/nuevo"
-              className="rounded-md bg-marca px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro"
+              className={`${ENLACE} bg-marca text-white hover:bg-marca-oscuro`}
             >
               Publicar aviso
             </Link>

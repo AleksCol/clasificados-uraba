@@ -4,14 +4,20 @@ import {
   descripcionCampo,
 } from "./EnvolturaCampo";
 
-type Props = Omit<React.ComponentProps<"input">, "id"> & {
+type Props = Omit<React.ComponentProps<"textarea">, "id"> & {
   etiqueta: string;
   nombre: string;
   errores?: string[];
   ayuda?: string;
 };
 
-export function Campo({ etiqueta, nombre, errores, ayuda, ...props }: Props) {
+export function AreaTexto({
+  etiqueta,
+  nombre,
+  errores,
+  ayuda,
+  ...props
+}: Props) {
   const tieneError = Boolean(errores?.length);
 
   return (
@@ -21,12 +27,13 @@ export function Campo({ etiqueta, nombre, errores, ayuda, ...props }: Props) {
       ayuda={ayuda}
       errores={errores}
     >
-      <input
+      <textarea
         id={nombre}
         name={nombre}
+        rows={6}
         aria-invalid={tieneError || undefined}
         aria-describedby={descripcionCampo(nombre, ayuda, tieneError)}
-        className={clasesControl(tieneError)}
+        className={`${clasesControl(tieneError)} resize-y`}
         {...props}
       />
     </EnvolturaCampo>

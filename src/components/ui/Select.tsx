@@ -4,14 +4,24 @@ import {
   descripcionCampo,
 } from "./EnvolturaCampo";
 
-type Props = Omit<React.ComponentProps<"input">, "id"> & {
+type Opcion = { valor: string; texto: string };
+
+type Props = Omit<React.ComponentProps<"select">, "id" | "children"> & {
   etiqueta: string;
   nombre: string;
+  opciones: Opcion[];
   errores?: string[];
   ayuda?: string;
 };
 
-export function Campo({ etiqueta, nombre, errores, ayuda, ...props }: Props) {
+export function Select({
+  etiqueta,
+  nombre,
+  opciones,
+  errores,
+  ayuda,
+  ...props
+}: Props) {
   const tieneError = Boolean(errores?.length);
 
   return (
@@ -21,14 +31,20 @@ export function Campo({ etiqueta, nombre, errores, ayuda, ...props }: Props) {
       ayuda={ayuda}
       errores={errores}
     >
-      <input
+      <select
         id={nombre}
         name={nombre}
         aria-invalid={tieneError || undefined}
         aria-describedby={descripcionCampo(nombre, ayuda, tieneError)}
         className={clasesControl(tieneError)}
         {...props}
-      />
+      >
+        {opciones.map((opcion) => (
+          <option key={opcion.valor} value={opcion.valor}>
+            {opcion.texto}
+          </option>
+        ))}
+      </select>
     </EnvolturaCampo>
   );
 }

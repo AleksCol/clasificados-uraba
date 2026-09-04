@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Municipio, TipoAviso } from "@/generated/prisma/enums";
 
 // Los celulares colombianos son 10 dígitos que empiezan en 3. Guardamos
 // siempre el formato internacional sin "+" (57 + los 10 dígitos), que es
@@ -48,3 +49,39 @@ export const esquemaLogin = z.object({
   email: campoEmail,
   password: z.string().min(1, "Escribe tu contraseña"),
 });
+
+const campoPrecio = z
+  .string()
+  .transform((valor) => valor.replace(/\D/g, ""))
+  .transform((digitos) => (digitos === "" ? null : Number(digitos)))
+  .refine(
+    (precio) => precio === null || (precio > 0 && precio <= 2_000_000_000),
+    "El precio debe estar entre $1 y $2.000.000.000",
+  );
+
+export const esquemaAviso = z
+  .object({
+    titulo: z
+      .string()
+      .trim()
+      .min(5, "El título debe tener al menos 5 caracteres")
+      .max(120, "El título no puede pasar de 120 caracteres"),
+    descripcion: z
+      .string()
+      .trim()
+      .min(20, "La descripción debe tener al menos 20 caracteres")
+      .max(2000, "La descripción no puede pasar de 2000 caracteres"),
+    tipo: z.enum(TipoAviso, { message: "Elige empleo o artículo" }),
+    municipio: z.enum(Municipio, { message: "Elige un municipio" }),
+    categoriaId: z.string().min(1, "Elige una categoría"),
+    precio: campoPrecio,
+  })
+  .superRefine((datos, ctx) => {
+    if (datos.tipo === "empleo" && datos.precio !== null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["precio"],
+        message: "Las ofertas de empleo no llevan precio",
+      });
+    }
+  });
