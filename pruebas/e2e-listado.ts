@@ -7,6 +7,7 @@ import {
   quedaLimpio,
   terminar,
 } from "./comun";
+import { normalizarTexto } from "../src/lib/texto";
 
 const EMAIL = `vendedor${DOMINIO_PRUEBA}`;
 const prisma = crearPrisma();
@@ -54,6 +55,9 @@ async function main() {
     { titulo: "Oficial de acabados", tipo: "empleo" as const, municipio: "chigorodo" as const, categoriaId: construccion.id, precio: null },
     { titulo: "Soldador con experiencia", tipo: "empleo" as const, municipio: "necocli" as const, categoriaId: construccion.id, precio: null },
     { titulo: "Celador para bodega", tipo: "empleo" as const, municipio: "carepa" as const, categoriaId: construccion.id, precio: null },
+    // Con tildes y con ene, para probar la busqueda normalizada.
+    { titulo: "Camión Chevrolet NPR con papeles al día", tipo: "articulo" as const, municipio: "apartado" as const, categoriaId: motos.id, precio: 78000000 },
+    { titulo: "Cuidador de niños en Necoclí", tipo: "empleo" as const, municipio: "necocli" as const, categoriaId: construccion.id, precio: null },
   ];
 
   for (const semilla of semillas) {
@@ -61,6 +65,7 @@ async function main() {
       data: {
         usuarioId: usuario.id,
         descripcion: `Descripcion de prueba para ${semilla.titulo}.`,
+        tituloNormalizado: normalizarTexto(semilla.titulo),
         ...semilla,
       },
     });
@@ -70,6 +75,7 @@ async function main() {
     data: {
       usuarioId: usuario.id,
       titulo: "Bicicleta pausada que nadie debe ver",
+      tituloNormalizado: normalizarTexto("Bicicleta pausada que nadie debe ver"),
       descripcion: "Este aviso esta pausado y no deberia salir en el listado.",
       tipo: "articulo",
       municipio: "turbo",
@@ -102,10 +108,38 @@ async function main() {
   afirmar(contarTarjetas(htmlTurbo.html) === Math.min(enTurbo, 12), `filtra ${enTurbo} avisos de Turbo`);
   afirmar(!htmlTurbo.html.includes("Juego de comedor"), "el filtro de Turbo excluye Necocli");
 
+  // Cuenta esperada segun la base, para convivir con los datos de muestra.
+  async function cuantosCoinciden(texto: string): Promise<number> {
+    return prisma.aviso.count({
+      where: { activo: true, tituloNormalizado: { contains: normalizarTexto(texto) } },
+    });
+  }
+
+  const conNevera = await cuantosCoinciden("nevera");
   const busqueda = await traer("/?q=nevera");
-  afirmar(contarTarjetas(busqueda.html) === 1, "la busqueda 'nevera' devuelve 1");
-  afirmar(busqueda.html.includes("Nevera Haceb"), "y es el aviso correcto");
-  afirmar(contarTarjetas((await traer("/?q=NEVERA")).html) === 1, "la busqueda ignora mayusculas");
+  afirmar(conNevera > 0, "hay avisos que dicen nevera");
+  afirmar(contarTarjetas(busqueda.html) === Math.min(conNevera, 12), `la busqueda 'nevera' devuelve ${conNevera}`);
+  afirmar(busqueda.html.includes("Nevera Haceb"), "y trae el aviso esperado");
+  afirmar(contarTarjetas((await traer("/?q=NEVERA")).html) === Math.min(conNevera, 12), "la busqueda ignora mayusculas");
+
+  // --- Busqueda sin tildes: el punto de la columna normalizada ---
+  // Escribir con tilde o sin ella tiene que dar exactamente lo mismo.
+  for (const [sinTilde, conTilde] of [["camion", "camión"], ["necocli", "Necoclí"], ["ninos", "niños"]]) {
+    const esperados = await cuantosCoinciden(sinTilde);
+    const a = contarTarjetas((await traer(`/?q=${encodeURIComponent(sinTilde)}`)).html);
+    const b = contarTarjetas((await traer(`/?q=${encodeURIComponent(conTilde)}`)).html);
+    afirmar(esperados > 0, `hay avisos que coinciden con "${sinTilde}"`);
+    afirmar(a === Math.min(esperados, 12), `"${sinTilde}" devuelve ${esperados}`);
+    afirmar(a === b, `"${sinTilde}" y "${conTilde}" dan lo mismo`);
+  }
+  afirmar(
+    (await traer("/?q=camion")).html.includes("Camión Chevrolet"),
+    "'camion' sin tilde trae el aviso con tilde",
+  );
+  afirmar(
+    contarTarjetas((await traer("/?q=CAMION")).html) === contarTarjetas((await traer("/?q=camion")).html),
+    "las mayusculas tampoco cambian el resultado",
+  );
 
   const vacia = await traer("/?q=zzzzzzz");
   afirmar(contarTarjetas(vacia.html) === 0, "una busqueda sin resultados no muestra tarjetas");

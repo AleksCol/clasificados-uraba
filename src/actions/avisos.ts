@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requerirUsuario } from "@/lib/sesion";
 import { esquemaAviso } from "@/lib/validaciones";
+import { normalizarTexto } from "@/lib/texto";
 import type { EstadoFormulario } from "@/lib/formularios";
 import type { TipoAviso } from "@/generated/prisma/enums";
 
@@ -52,7 +53,13 @@ export async function crearAviso(
     return { errores: { categoriaId: ["Elige una categoría de este tipo"] } };
   }
 
-  await prisma.aviso.create({ data: { ...datos, usuarioId: usuario.id } });
+  await prisma.aviso.create({
+    data: {
+      ...datos,
+      tituloNormalizado: normalizarTexto(datos.titulo),
+      usuarioId: usuario.id,
+    },
+  });
 
   revalidatePath("/mis-avisos");
   redirect("/mis-avisos");
@@ -88,7 +95,7 @@ export async function actualizarAviso(
   // de otro usuario no actualiza nada, sin ventana entre leer y escribir.
   const { count } = await prisma.aviso.updateMany({
     where: { id, usuarioId: usuario.id },
-    data: datos,
+    data: { ...datos, tituloNormalizado: normalizarTexto(datos.titulo) },
   });
 
   if (count === 0) {

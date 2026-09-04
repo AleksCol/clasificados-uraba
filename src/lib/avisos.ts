@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "./prisma";
 import { AVISOS_POR_PAGINA, type Filtros } from "./filtros";
+import { normalizarTexto } from "./texto";
 
 function condiciones(filtros: Filtros): Prisma.AvisoWhereInput {
   return {
@@ -9,8 +10,10 @@ function condiciones(filtros: Filtros): Prisma.AvisoWhereInput {
     ...(filtros.tipo && { tipo: filtros.tipo }),
     ...(filtros.categoriaId && { categoriaId: filtros.categoriaId }),
     ...(filtros.municipio && { municipio: filtros.municipio }),
+    // Se compara normalizado contra normalizado: así "camion" encuentra
+    // "Camión" sin depender de la extensión unaccent de Postgres.
     ...(filtros.texto && {
-      titulo: { contains: filtros.texto, mode: "insensitive" as const },
+      tituloNormalizado: { contains: normalizarTexto(filtros.texto) },
     }),
   };
 }

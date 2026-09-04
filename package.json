@@ -12,7 +12,9 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "pruebas": "tsx pruebas/e2e-auth.ts && tsx pruebas/e2e-avisos.ts && tsx pruebas/e2e-listado.ts && tsx pruebas/e2e-fotos.ts && tsx pruebas/e2e-navegador.ts"
+    "pruebas": "tsx pruebas/e2e-auth.ts && tsx pruebas/e2e-avisos.ts && tsx pruebas/e2e-listado.ts && tsx pruebas/e2e-fotos.ts && tsx pruebas/e2e-navegador.ts",
+    "db:seed-demo": "tsx prisma/seed-demo.ts",
+    "db:seed-demo:limpiar": "tsx prisma/seed-demo.ts --limpiar"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

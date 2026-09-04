@@ -9,6 +9,7 @@ import {
   quedaLimpio,
   terminar,
 } from "./comun";
+import { normalizarTexto } from "../src/lib/texto";
 
 // Estas pruebas necesitan un navegador de verdad porque cubren lo que no se ve
 // por HTTP: errores de consola de React y si un click navega. Usamos el Edge
@@ -52,6 +53,7 @@ async function main() {
     data: {
       usuarioId: usuario.id,
       titulo: "Consola de videojuegos usada",
+      tituloNormalizado: normalizarTexto("Consola de videojuegos usada"),
       descripcion: "Se vende consola en buen estado, con dos controles incluidos.",
       tipo: "articulo",
       municipio: "apartado",
