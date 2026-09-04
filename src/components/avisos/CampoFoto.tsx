@@ -126,16 +126,29 @@ export function CampoFoto({ urlInicial, errores }: Props) {
       )}
 
       <div className="mt-2 flex flex-wrap items-center gap-3">
-        <input
-          ref={entrada}
-          id="archivoFoto"
-          type="file"
-          accept={TIPOS_DE_IMAGEN.join(",")}
-          onChange={alElegirArchivo}
-          disabled={trabajando}
-          aria-describedby="foto-ayuda"
-          className="text-sm file:mr-3 file:rounded-lg file:border file:border-borde file:bg-fondo file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-superficie"
-        />
+        {/* El input va oculto y el botón es esta etiqueta. El botón nativo lo
+            dibuja el navegador en su propio idioma, y además seguía diciendo
+            "ningún archivo" después de subir, porque limpiamos el input para
+            poder reintentar con el mismo archivo. */}
+        <label
+          className={`rounded-lg border border-borde px-3 py-2 text-sm font-medium transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-marca ${
+            trabajando
+              ? "cursor-not-allowed opacity-60"
+              : "cursor-pointer hover:bg-superficie"
+          }`}
+        >
+          <input
+            ref={entrada}
+            id="archivoFoto"
+            type="file"
+            accept={TIPOS_DE_IMAGEN.join(",")}
+            onChange={alElegirArchivo}
+            disabled={trabajando}
+            aria-describedby="foto-ayuda"
+            className="sr-only"
+          />
+          {url ? "Cambiar foto" : "Elegir foto"}
+        </label>
 
         {url && !trabajando && (
           <button

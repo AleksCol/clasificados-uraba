@@ -17,19 +17,19 @@ Esto lo centraliza en un listado con filtros y búsqueda, donde cada aviso tiene
 
 El listado es público: se ve sin registrarse. Se filtra por tipo, municipio y categoría, y se busca por título.
 
-[CAPTURA: listado con filtros]
+![Listado con filtros por tipo, municipio y categoría](capturas/listado.png)
 
 Para publicar hace falta una cuenta. El formulario cambia según lo que se publique: los artículos llevan precio y foto, las ofertas de empleo no. La foto se reduce en el navegador antes de subirse, porque las cámaras de celular sacan imágenes de varios megas y en el listado nunca se ven a más de 1600 px.
 
-[CAPTURA: formulario de publicar con foto]
+![Formulario de publicación con la foto ya subida](capturas/publicar.png)
 
 No hay mensajería interna. El aviso muestra un botón que abre WhatsApp con el número de quien publicó y un mensaje que ya menciona el aviso. En la zona el contacto pasa por ahí de todos modos, así que meter un chat propio en el medio solo agregaba fricción.
 
-[CAPTURA: detalle de un aviso con el botón de WhatsApp]
+![Detalle de un aviso con el botón de contacto por WhatsApp](capturas/detalle.png)
 
 Cada usuario administra lo suyo: crea, edita y pausa sus propios avisos.
 
-[CAPTURA: panel Mis avisos]
+![Panel Mis avisos, con un aviso pausado](capturas/mis-avisos.png)
 
 ## Stack
 
