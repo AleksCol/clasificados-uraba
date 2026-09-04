@@ -1,0 +1,85 @@
+// Schema de Clasificados Urabá.
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TipoAviso {
+  empleo
+  articulo
+}
+
+// Los 11 municipios de la subregión de Urabá (Antioquia).
+enum Municipio {
+  apartado
+  turbo
+  chigorodo
+  carepa
+  necocli
+  arboletes
+  san_juan_de_uraba
+  san_pedro_de_uraba
+  mutata
+  murindo
+  vigia_del_fuerte
+}
+
+model Usuario {
+  id           String   @id @default(cuid())
+  nombre       String
+  email        String   @unique
+  passwordHash String
+  // Número de WhatsApp en formato internacional sin "+", ej: 573001234567.
+  whatsapp     String
+  creadoEn     DateTime @default(now())
+
+  avisos Aviso[]
+
+  @@map("usuarios")
+}
+
+model Categoria {
+  id     String    @id @default(cuid())
+  nombre String
+  tipo   TipoAviso
+
+  avisos Aviso[]
+
+  @@unique([nombre, tipo])
+  // Necesario para la llave foránea compuesta desde Aviso.
+  @@unique([id, tipo])
+  @@map("categorias")
+}
+
+model Aviso {
+  id            String    @id @default(cuid())
+  titulo        String
+  descripcion   String
+  tipo          TipoAviso
+  municipio     Municipio
+  // Pesos colombianos enteros. Solo aplica a tipo = articulo.
+  precio        Int?
+  fotoUrl       String?
+  activo        Boolean   @default(true)
+  publicadoEn   DateTime  @default(now())
+  actualizadoEn DateTime  @updatedAt
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  // La FK incluye "tipo" para que la base rechace un aviso de empleo
+  // con una categoría de artículo (y viceversa).
+  categoriaId String
+  categoria   Categoria @relation(fields: [categoriaId, tipo], references: [id, tipo], onDelete: Restrict)
+
+  @@index([activo, tipo, municipio])
+  @@index([usuarioId])
+  @@index([categoriaId])
+  @@map("avisos")
+}
