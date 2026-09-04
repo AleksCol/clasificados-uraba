@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { del } from "@vercel/blob";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
@@ -16,8 +17,9 @@ function leerFormulario(formData: FormData) {
     tipo: formData.get("tipo"),
     municipio: formData.get("municipio"),
     categoriaId: formData.get("categoriaId"),
-    // El campo de precio no se renderiza cuando el tipo es empleo.
+    // Precio y foto no se renderizan cuando el tipo es empleo.
     precio: formData.get("precio") ?? "",
+    fotoUrl: formData.get("fotoUrl") ?? "",
   };
 }
 
@@ -75,6 +77,13 @@ export async function actualizarAviso(
     return { errores: { categoriaId: ["Elige una categoría de este tipo"] } };
   }
 
+  // Se lee la foto anterior (filtrando por dueño) para poder borrarla del store
+  // si el usuario la reemplaza o la quita.
+  const anterior = await prisma.aviso.findFirst({
+    where: { id, usuarioId: usuario.id },
+    select: { fotoUrl: true },
+  });
+
   // updateMany filtra por id Y por dueño en la misma consulta: si el aviso es
   // de otro usuario no actualiza nada, sin ventana entre leer y escribir.
   const { count } = await prisma.aviso.updateMany({
@@ -84,6 +93,12 @@ export async function actualizarAviso(
 
   if (count === 0) {
     return { errorGeneral: "Ese aviso no existe o no es tuyo" };
+  }
+
+  if (anterior?.fotoUrl && anterior.fotoUrl !== datos.fotoUrl) {
+    // Si el borrado falla no tiene sentido revertir la edición: queda un
+    // archivo huérfano, no un aviso roto.
+    await del(anterior.fotoUrl).catch(() => {});
   }
 
   revalidatePath("/mis-avisos");

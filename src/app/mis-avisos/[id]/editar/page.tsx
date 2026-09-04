@@ -31,6 +31,7 @@ export default async function PaginaEditarAviso({
         municipio: true,
         categoriaId: true,
         precio: true,
+        fotoUrl: true,
       },
     }),
     prisma.categoria.findMany({

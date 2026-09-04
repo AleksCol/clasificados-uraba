@@ -30,6 +30,7 @@ export async function buscarAvisos(filtros: Filtros) {
         tipo: true,
         municipio: true,
         precio: true,
+        fotoUrl: true,
         publicadoEn: true,
         categoria: { select: { nombre: true } },
       },

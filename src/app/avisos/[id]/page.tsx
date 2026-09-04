@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Contenedor } from "@/components/layout/Contenedor";
@@ -18,6 +19,7 @@ async function obtenerAviso(id: string) {
       descripcion: true,
       municipio: true,
       precio: true,
+      fotoUrl: true,
       publicadoEn: true,
       categoria: { select: { nombre: true } },
       usuario: { select: { nombre: true, whatsapp: true } },
@@ -73,6 +75,19 @@ export default async function PaginaAviso({
           <p className="mt-4 text-2xl font-semibold text-marca-oscuro">
             {formatearPrecio(aviso.precio)}
           </p>
+        )}
+
+        {aviso.fotoUrl && (
+          <div className="relative mt-6 aspect-4/3 w-full overflow-hidden rounded-xl border border-borde bg-superficie">
+            <Image
+              src={aviso.fotoUrl}
+              alt={aviso.titulo}
+              fill
+              sizes="(min-width: 768px) 672px, 100vw"
+              priority
+              className="object-contain"
+            />
+          </div>
         )}
 
         <p className="mt-6 whitespace-pre-line leading-relaxed">

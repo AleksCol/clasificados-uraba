@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Municipio, TipoAviso } from "@/generated/prisma/enums";
+import { esUrlDeFoto } from "./foto";
 
 // Los celulares colombianos son 10 dígitos que empiezan en 3. Guardamos
 // siempre el formato internacional sin "+" (57 + los 10 dígitos), que es
@@ -59,6 +60,17 @@ const campoPrecio = z
     "El precio debe estar entre $1 y $2.000.000.000",
   );
 
+// El formulario manda la URL que devolvió Vercel Blob, no el archivo. Hay que
+// comprobar que sea del store propio y no una URL cualquiera.
+const campoFotoUrl = z
+  .string()
+  .trim()
+  .transform((valor) => valor || null)
+  .refine(
+    (url) => url === null || esUrlDeFoto(url),
+    "Esa foto no viene de una subida válida",
+  );
+
 export const esquemaAviso = z
   .object({
     titulo: z
@@ -75,6 +87,7 @@ export const esquemaAviso = z
     municipio: z.enum(Municipio, { message: "Elige un municipio" }),
     categoriaId: z.string().min(1, "Elige una categoría"),
     precio: campoPrecio,
+    fotoUrl: campoFotoUrl,
   })
   .superRefine((datos, ctx) => {
     if (datos.tipo === "empleo" && datos.precio !== null) {
@@ -82,6 +95,13 @@ export const esquemaAviso = z
         code: "custom",
         path: ["precio"],
         message: "Las ofertas de empleo no llevan precio",
+      });
+    }
+    if (datos.tipo === "empleo" && datos.fotoUrl !== null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["fotoUrl"],
+        message: "Las ofertas de empleo no llevan foto",
       });
     }
   });

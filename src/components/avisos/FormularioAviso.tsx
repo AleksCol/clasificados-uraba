@@ -10,6 +10,7 @@ import { AvisoError } from "@/components/ui/AvisoError";
 import { Boton } from "@/components/ui/Boton";
 import { Campo } from "@/components/ui/Campo";
 import { Select } from "@/components/ui/Select";
+import { CampoFoto } from "./CampoFoto";
 
 export type CategoriaOpcion = { id: string; nombre: string; tipo: TipoAviso };
 
@@ -21,6 +22,7 @@ export type ValoresAviso = {
   municipio: Municipio;
   categoriaId: string;
   precio: number | null;
+  fotoUrl: string | null;
 };
 
 type Props = {
@@ -134,6 +136,15 @@ export function FormularioAviso({
         defaultValue={valores?.municipio}
         errores={estado.errores?.municipio}
       />
+
+      {tipo === "articulo" && (
+        <CampoFoto
+          // Al cambiar de tipo se descarta lo que hubiera cargado.
+          key={tipo}
+          urlInicial={valores?.fotoUrl}
+          errores={estado.errores?.fotoUrl}
+        />
+      )}
 
       {tipo === "articulo" && (
         <Campo
